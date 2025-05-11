@@ -205,7 +205,7 @@ bool Graphics::Initialize(int width, int height)
 		body.object = new Sphere(48, body.texturePath.c_str());
 	}
 
-
+	m_skybox = new Sphere(32, "assets/galaxy.jpg");
 
 	//enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -281,6 +281,15 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	localTransform = tmat * rmat * smat;
 	if (m_mesh != NULL)
 		m_mesh->Update(localTransform);
+
+	if (m_skybox) {
+		tmat = glm::translate(glm::mat4(1.0f), m_camera->getPosition());
+		smat = glm::scale(glm::mat4(1.0f), glm::vec3(50.0f)); // Large enough to surround all objects
+		rmat = glm::mat4(1.0f);  // No rotation
+		glm::mat4 model = tmat * rmat * smat;
+		m_skybox->Update(model);
+	}
+
 
 
 	while (!modelStack.empty()) modelStack.pop();
@@ -368,6 +377,11 @@ void Graphics::Render()
 
 	// Render the objects
 
+	// Disable depth writing to render the skybox behind everything
+	glDepthMask(GL_FALSE);
+	glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_skybox->GetModel()));
+	m_skybox->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+	glDepthMask(GL_TRUE);
 
 	// Render Ship
 	if (m_mesh != NULL) {

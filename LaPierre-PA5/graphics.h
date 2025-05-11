@@ -90,6 +90,8 @@ class Graphics
 
     Mesh* m_mesh;
 
+    Sphere* m_skybox = nullptr;
+
     glm::vec3 currentShipPos;
     glm::quat currentShipRot;
 
