@@ -88,7 +88,7 @@ bool Graphics::Initialize(int width, int height)
 
 	currentShipPos = camPos + offset;
 	// Look in the same direction as the camera
-	glm::vec3 direction = glm::normalize(camFront);  // Forward direction
+	glm::vec3 direction = glm::normalize(-camFront);  // Forward direction
 	glm::vec3 up = glm::normalize(camUp);            // World or camera up
 
 	currentShipRot = glm::quatLookAt(direction, up);
@@ -247,22 +247,17 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	glm::vec3 targetPos = camPos + offset;
 
 	// --- Target Orientation (facing camera direction) ---
-	glm::quat targetRot = glm::quatLookAt(camFront, camUp);
-
-	// --- Apply user-controlled roll, pitch, yaw ---
-	//float rollDegrees = ...; // Set from input
-	//float pitchDegrees = ...;
-	//float yawDegrees = ...;
+	glm::quat targetRot = currentShipRot;
 
 	// Convert to radians
-	float roll = glm::radians(0.0f);
-	float pitch = glm::radians(0.0f);
-	float yaw = glm::radians(0.0f);
+	float rollRad = glm::radians(roll);
+	float pitchRad = glm::radians(pitch);
+	float yawRad = glm::radians(yaw);
 
 	// Build rotation relative to camera's local axes
-	glm::quat q_pitch = glm::angleAxis(pitch, camRight);
-	glm::quat q_yaw = glm::angleAxis(yaw, camUp);
-	glm::quat q_roll = glm::angleAxis(roll, camFront);
+	glm::quat q_pitch = glm::angleAxis(pitchRad, camRight);
+	glm::quat q_yaw = glm::angleAxis(yawRad, camUp);
+	glm::quat q_roll = glm::angleAxis(rollRad, camFront);
 
 	// Apply in Yaw  Pitch  Roll order (common flight sim order)
 	glm::quat userRot = q_yaw * q_pitch * q_roll;

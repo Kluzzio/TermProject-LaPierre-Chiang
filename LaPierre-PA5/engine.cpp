@@ -43,6 +43,7 @@ bool Engine::Initialize()
   glfwSetScrollCallback(m_window->getWindow(), scroll_callback);
 
   sensitivity = 10.f;
+  speed = 0.f;
   // No errors
   return true;
 }
@@ -66,16 +67,45 @@ void Engine::ProcessInput()
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_window->getWindow(), true);
 
+    float yawInput = 0.0f;
+    float pitchInput = 0.0f;
+    float rollInput = 0.0f;
 
     // Update camera animation here.
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(sensitivity/5, 0., 0., 0., 0., 0.);
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(-sensitivity/5, 0., 0., 0., 0., 0.);
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS) {
+        speed += .2;
+        speed = glm::clamp(0.0, speed, 10.0);
+    }
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
+        speed -= .2;
+        speed = glm::clamp(0.0, speed, 10.0);
+    }
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(0., sensitivity/5, 0., 0., 0., 0.);
+        m_graphics->getCamera()->Update(0., (sensitivity + 3.0 * speed) / 20, 0., 0., 0., 0.);
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(0., -sensitivity/5, 0., 0., 0., 0.);
+        m_graphics->getCamera()->Update(0., -(sensitivity + 3.0 * speed)/20, 0., 0., 0., 0.);
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT) == GLFW_PRESS) {
+        yawInput = 2.0f; // Yaw left
+    }
+    else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS) {
+        yawInput = -2.0f; // Yaw right
+    }
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_UP) == GLFW_PRESS) {
+        pitchInput = 2.0f; // Pitch up
+    }
+    else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_DOWN) == GLFW_PRESS) {
+        pitchInput = -2.0f; // Pitch down
+    }
+
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_Q) == GLFW_PRESS) {
+        rollInput = -2.0f;  // Roll left
+    }
+    else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_E) == GLFW_PRESS) {
+        rollInput = 2.0f;   // Roll right
+    }
+    m_graphics->getCamera()->Update(speed / 5, 0., 0., 0., 0., 0.);
+
+    m_graphics->UpdateRotation(yawInput, pitchInput, rollInput);
 
     m_graphics->getCamera()->Update(0., 0., 0., sensitivity * (m_xpos - lastX) / m_WINDOW_WIDTH, 
                                                     sensitivity * (m_ypos - lastY) / m_WINDOW_HEIGHT, 0.);

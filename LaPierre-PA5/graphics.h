@@ -43,6 +43,12 @@ class Graphics
 
     Camera* getCamera() { return m_camera; }
 
+    void UpdateRotation(float yawInput, float pitchInput, float rollInput) {
+        yaw = yawInput;
+        pitch = pitchInput;
+        roll = rollInput;
+    }
+
   private:
     std::string ErrorString(GLenum error);
 
@@ -86,6 +92,10 @@ class Graphics
 
     glm::vec3 currentShipPos;
     glm::quat currentShipRot;
+
+    float yaw = 0.0f;
+    float pitch = 0.0f;
+    float roll = 0.0f;
 };
 
 #endif /* GRAPHICS_H */

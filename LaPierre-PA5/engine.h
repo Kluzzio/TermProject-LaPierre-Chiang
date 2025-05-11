@@ -40,6 +40,7 @@ class Engine
     static double lastX, lastY;
     double sensitivity;
     static bool firstUpdate;
+    double speed;
 };
 
 #endif // ENGINE_H
