@@ -84,8 +84,8 @@ class Graphics
 
     Mesh* m_mesh;
 
-
-
+    glm::vec3 currentShipPos;
+    glm::quat currentShipRot;
 };
 
 #endif /* GRAPHICS_H */

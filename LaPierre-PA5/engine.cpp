@@ -42,7 +42,7 @@ bool Engine::Initialize()
   glfwSetInputMode(m_window->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetScrollCallback(m_window->getWindow(), scroll_callback);
 
-  sensitivity = 20.f;
+  sensitivity = 10.f;
   // No errors
   return true;
 }
@@ -69,13 +69,13 @@ void Engine::ProcessInput()
 
     // Update camera animation here.
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(sensitivity, 0., 0., 0., 0., 0.);
+        m_graphics->getCamera()->Update(sensitivity/5, 0., 0., 0., 0., 0.);
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(-sensitivity, 0., 0., 0., 0., 0.);
+        m_graphics->getCamera()->Update(-sensitivity/5, 0., 0., 0., 0., 0.);
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(0., sensitivity, 0., 0., 0., 0.);
+        m_graphics->getCamera()->Update(0., sensitivity/5, 0., 0., 0., 0.);
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(0., -sensitivity, 0., 0., 0., 0.);
+        m_graphics->getCamera()->Update(0., -sensitivity/5, 0., 0., 0., 0.);
 
     m_graphics->getCamera()->Update(0., 0., 0., sensitivity * (m_xpos - lastX) / m_WINDOW_WIDTH, 
                                                     sensitivity * (m_ypos - lastY) / m_WINDOW_HEIGHT, 0.);

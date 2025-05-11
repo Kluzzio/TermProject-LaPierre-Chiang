@@ -13,6 +13,10 @@ public:
 	glm::mat4 GetView();
 	void Update(float d_forward, float d_left, float d_up, float d_theta, float d_phi, float d_fov);
 
+	glm::vec3 getPosition() const { return cameraPos; }
+	glm::vec3 getFront() const { return cameraFront; }
+	glm::vec3 getUp() const { return cameraUp; }
+
 private:
 	int width, height;
 	glm::vec3 cameraPos, cameraFront, cameraUp;
