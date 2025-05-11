@@ -246,7 +246,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	glm::vec3 offset = (30.0f * camFront) + (-10.0f * camUp);
 	glm::vec3 targetPos = camPos + offset;
 
-	// --- Target Orientation (facing camera direction) ---
+	// --- Target Orientation ---
 	glm::quat targetRot = currentShipRot;
 
 	// Convert to radians
@@ -271,7 +271,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	// Interpolate position and rotation
 	currentShipPos = glm::mix(currentShipPos, targetPos, t);
-	currentShipRot = glm::slerp(currentShipRot, targetRot, t);
+	currentShipRot = targetRot;
 
 	// Final transforms
 	tmat = glm::translate(glm::mat4(1.0f), currentShipPos);
