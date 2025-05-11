@@ -3,26 +3,23 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include <string>
-using namespace std;
 
 class Window
 {
-  public:
+public:
     Window(const char* name, int* width, int* height);
     ~Window();
+
     bool Initialize();
     void Swap();
+    GLFWwindow* getWindow() const;
 
-    GLFWwindow* getWindow() {
-        return gWindow;
-    };
-
-  private:
+private:
     GLFWwindow* gWindow;
-
-
+    const char* name;
+    int* width;
+    int* height;
 };
 
 #endif /* WINDOW_H */

@@ -39,7 +39,7 @@ bool Shader::AddShader(GLenum ShaderType)
 
   if(ShaderType == GL_VERTEX_SHADER)
   {
-    s = "#version 430\n \
+    s = "#version 410\n \
           \
           layout (location = 0) in vec3 v_position; \
           layout (location = 1) in vec3 v_color; \
@@ -65,7 +65,7 @@ bool Shader::AddShader(GLenum ShaderType)
   }
   else if(ShaderType == GL_FRAGMENT_SHADER)
   {
-    s = "#version 430\n \
+    s = "#version 410\n \
           \
           uniform sampler2D sp; \
           \

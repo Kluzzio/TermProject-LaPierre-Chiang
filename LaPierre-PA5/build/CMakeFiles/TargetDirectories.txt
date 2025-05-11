@@ -1,0 +1,3 @@
+/Users/aliciachiang/CS 480/TermProject-LaPierre-Chiang/LaPierre-PA5/build/CMakeFiles/LaPierre_PA5.dir
+/Users/aliciachiang/CS 480/TermProject-LaPierre-Chiang/LaPierre-PA5/build/CMakeFiles/edit_cache.dir
+/Users/aliciachiang/CS 480/TermProject-LaPierre-Chiang/LaPierre-PA5/build/CMakeFiles/rebuild_cache.dir

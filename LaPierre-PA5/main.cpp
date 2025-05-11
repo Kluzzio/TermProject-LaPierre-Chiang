@@ -5,17 +5,18 @@
 
 int main(int argc, char **argv)
 {
-  // Start an engine and run it then cleanup after
+  std::cout << "Creating engine...\n";
   Engine *engine = new Engine("Term Project - LaPierre/Chiang", 800, 600);
-  if(!engine->Initialize())
-  {
-    printf("The engine failed to start.\n");
-    delete engine;
-    engine = NULL;
-    return 1;
+  
+  std::cout << "Initializing engine...\n";
+  if (!engine->Initialize()) {
+      std::cout << "The engine failed to start.\n";
+      delete engine;
+      return 1;
   }
+  
+  std::cout << "Engine initialized successfully.\n";
   engine->Run();
-  delete engine;
-  engine = NULL;
-  return 0;
+  std::cout << "Engine finished running.\n";
+  
 }
