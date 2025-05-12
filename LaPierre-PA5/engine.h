@@ -41,6 +41,13 @@ class Engine
     double sensitivity;
     static bool firstUpdate;
     double speed;
+
+    glm::vec3 oldCamPos;
+    glm::vec3 oldFront;
+    glm::vec3 savedClosestSpherePos;
+
+    bool wasMKeyPressed = false;
+
 };
 
 #endif // ENGINE_H

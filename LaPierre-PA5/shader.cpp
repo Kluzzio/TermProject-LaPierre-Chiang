@@ -37,32 +37,35 @@ bool Shader::AddShader(GLenum ShaderType)
 {
   std::string s;
 
-  if(ShaderType == GL_VERTEX_SHADER)
+  if (ShaderType == GL_VERTEX_SHADER)
   {
-    s = "#version 430\n \
-          \
-          layout (location = 0) in vec3 v_position; \
-          layout (location = 1) in vec3 v_color; \
-          layout (location = 2) in vec2 v_tc;  \
-             \
-          out vec3 color; \
-          out vec2 tc;\
-          \
-          uniform mat4 projectionMatrix; \
-          uniform mat4 viewMatrix; \
-          uniform mat4 modelMatrix; \
-          uniform bool hasTexture;        \
+      s = "#version 430\n \
+        \
+        layout (location = 0) in vec3 v_position; \
+        layout (location = 1) in vec3 v_color; \
+        layout (location = 2) in vec2 v_tc; \
+        layout (location = 3) in mat4 instanceMatrix; \
+        \
+        out vec3 color; \
+        out vec2 tc; \
+        \
+        uniform mat4 projectionMatrix; \
+        uniform mat4 viewMatrix; \
+        uniform mat4 modelMatrix; \
+          uniform bool hasTexture; \
           uniform sampler2D sp; \
-          \
-          void main(void) \
-          { \
+        \
+        void main(void) \
+        { \
             vec4 v = vec4(v_position, 1.0); \
-            gl_Position = (projectionMatrix * viewMatrix * modelMatrix) * v; \
+            mat4 model = modelMatrix * instanceMatrix; \
+            gl_Position = projectionMatrix * viewMatrix * modelMatrix * v; \
             color = v_color; \
-            tc = v_tc;\
-          } \
-          ";
+            tc = v_tc; \
+        } \
+        ";
   }
+
   else if(ShaderType == GL_FRAGMENT_SHADER)
   {
     s = "#version 430\n \

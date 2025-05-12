@@ -43,11 +43,16 @@ class Graphics
 
     Camera* getCamera() { return m_camera; }
 
+    glm::vec3 GetClosestSpherePosition(const glm::vec3& cameraPos) const;
+
     void UpdateRotation(float yawInput, float pitchInput, float rollInput) {
         yaw = yawInput;
         pitch = pitchInput;
         roll = rollInput;
     }
+
+    void setGamemode(bool gamemode) { gamemodeExploration = gamemode; }
+    bool getGamemode() { return gamemodeExploration; }
 
   private:
     std::string ErrorString(GLenum error);
@@ -98,6 +103,8 @@ class Graphics
     float yaw = 0.0f;
     float pitch = 0.0f;
     float roll = 0.0f;
+
+    bool gamemodeExploration = true;
 };
 
 #endif /* GRAPHICS_H */

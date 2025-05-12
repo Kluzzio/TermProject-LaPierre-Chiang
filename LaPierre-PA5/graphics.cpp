@@ -236,51 +236,60 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		modelStack.push(glm::mat4(1.0f));  // Push identity matrix
 	}
 
-	// Camera basis vectors
-	glm::vec3 camPos = m_camera->getPosition();
-	glm::vec3 camFront = glm::normalize(m_camera->getFront());
-	glm::vec3 camUp = glm::normalize(m_camera->getUp());
-	glm::vec3 camRight = glm::normalize(glm::cross(camFront, camUp));
+	if (getGamemode()) {
+		// Camera basis vectors
+		glm::vec3 camPos = m_camera->getPosition();
+		glm::vec3 camFront = glm::normalize(m_camera->getFront());
+		glm::vec3 camUp = glm::normalize(m_camera->getUp());
+		glm::vec3 camRight = glm::normalize(glm::cross(camFront, camUp));
 
-	// Define offset behind and below camera
-	glm::vec3 offset = (30.0f * camFront) + (-10.0f * camUp);
-	glm::vec3 targetPos = camPos + offset;
+		// Define offset behind and below camera
+		glm::vec3 offset = (30.0f * camFront) + (-10.0f * camUp);
+		glm::vec3 targetPos = camPos + offset;
 
-	// --- Target Orientation ---
-	glm::quat targetRot = currentShipRot;
+		// --- Target Orientation ---
+		glm::quat targetRot = currentShipRot;
 
-	// Convert to radians
-	float rollRad = glm::radians(roll);
-	float pitchRad = glm::radians(pitch);
-	float yawRad = glm::radians(yaw);
+		// Convert to radians
+		float rollRad = glm::radians(roll);
+		float pitchRad = glm::radians(pitch);
+		float yawRad = glm::radians(yaw);
 
-	// Build rotation relative to camera's local axes
-	glm::quat q_pitch = glm::angleAxis(pitchRad, camRight);
-	glm::quat q_yaw = glm::angleAxis(yawRad, camUp);
-	glm::quat q_roll = glm::angleAxis(rollRad, camFront);
+		// Build rotation relative to camera's local axes
+		glm::quat q_pitch = glm::angleAxis(pitchRad, camRight);
+		glm::quat q_yaw = glm::angleAxis(yawRad, camUp);
+		glm::quat q_roll = glm::angleAxis(rollRad, camFront);
 
-	// Apply in Yaw  Pitch  Roll order (common flight sim order)
-	glm::quat userRot = q_yaw * q_pitch * q_roll;
+		// Apply in Yaw  Pitch  Roll order (common flight sim order)
+		glm::quat userRot = q_yaw * q_pitch * q_roll;
 
-	// Combine target facing + user input
-	targetRot = targetRot * userRot;
+		// Combine target facing + user input
+		targetRot = targetRot * userRot;
 
-	// Interpolation for smooth following
-	float followSpeed = 5.0f;
-	float t = glm::clamp(static_cast<float>(followSpeed * dt), 0.0f, 1.0f);
+		// Interpolation for smooth following
+		float followSpeed = 5.0f;
+		float t = glm::clamp(static_cast<float>(followSpeed * dt), 0.0f, 1.0f);
 
-	// Interpolate position and rotation
-	currentShipPos = glm::mix(currentShipPos, targetPos, t);
-	currentShipRot = targetRot;
+		// Interpolate position and rotation
+		currentShipPos = glm::mix(currentShipPos, targetPos, t);
+		currentShipRot = targetRot;
 
-	// Final transforms
-	tmat = glm::translate(glm::mat4(1.0f), currentShipPos);
-	rmat = glm::mat4_cast(currentShipRot);
-	smat = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		// Final transforms
+		tmat = glm::translate(glm::mat4(1.0f), currentShipPos);
+		rmat = glm::mat4_cast(currentShipRot);
+		smat = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
-	localTransform = tmat * rmat * smat;
-	if (m_mesh != NULL)
-		m_mesh->Update(localTransform);
+	}
+	else {
+		smat = glm::scale(glm::mat4(1.0f), glm::vec3(0.0f)); // scale to 0
+		rmat = glm::mat4(1.0f); // identity rotation
+		tmat = glm::mat4(1.0f); // no translation
+
+	}
+
+		localTransform = tmat * rmat * smat;
+		if (m_mesh != NULL)
+			m_mesh->Update(localTransform);
 
 	if (m_skybox) {
 		tmat = glm::translate(glm::mat4(1.0f), m_camera->getPosition());
@@ -359,6 +368,28 @@ void Graphics::ComputeTransforms(double dt, std::vector<float> speed, std::vecto
 	rmat = glm::rotate(glm::mat4(1.f), rotSpeed * (float)dt, rotVector);
 	smat = glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
 }
+
+glm::vec3 Graphics::GetClosestSpherePosition(const glm::vec3& cameraPos) const
+{
+	float minDistance = std::numeric_limits<float>::max();
+	glm::vec3 closestPosition;
+
+	for (const auto& sphere : celestialBodies)
+	{
+		if (sphere.name != "Sun") {
+			glm::vec3 pos = glm::vec3(sphere.object->GetModel()[3]);
+			float distance = glm::distance(cameraPos, pos);
+
+			if (distance < minDistance) {
+				minDistance = distance;
+				closestPosition = pos;
+			}
+		}
+	}
+
+	return closestPosition;
+}
+
 
 void Graphics::Render()
 {

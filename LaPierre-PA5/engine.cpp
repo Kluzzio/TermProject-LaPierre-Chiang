@@ -71,50 +71,139 @@ void Engine::ProcessInput()
     float pitchInput = 0.0f;
     float rollInput = 0.0f;
 
-    // Update camera animation here.
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS) {
-        speed += .2;
-        speed = glm::clamp(0.0, speed, 10.0);
+    bool isMKeyPressed = glfwGetKey(m_window->getWindow(), GLFW_KEY_M) == GLFW_PRESS;
+    if (isMKeyPressed && !wasMKeyPressed) {
+        m_graphics->setGamemode(!m_graphics->getGamemode());
+
+        Camera* m_camera = m_graphics->getCamera();
+        glm::vec3 camPos = m_camera->getPosition();
+        glm::vec3 closestSpherePos = m_graphics->GetClosestSpherePosition(camPos);
+
+        savedClosestSpherePos = closestSpherePos;
+
+        //std::cout << "Closest sphere position: "
+        //    << glm::to_string(closestSpherePos) << std::endl;
+
+        // Gamemode: Planet observation
+        if (!m_graphics->getGamemode()) {
+            oldCamPos = camPos;
+            oldFront = m_camera->getFront();
+
+            // === Move camera to a fixed distance away from the sphere ===
+            const float desiredDistance = 85.0f;  // Set your desired distance here
+
+            glm::vec3 direction = glm::normalize(glm::vec3(0, 0, 0) - closestSpherePos); // From sphere toward origin
+            glm::vec3 worldUp = glm::vec3(0, 1, 0);
+            glm::vec3 leftDirection = glm::normalize(glm::cross(worldUp, direction));
+            glm::vec3 newCamPos = closestSpherePos + leftDirection * desiredDistance;
+
+            // === Update camera position and orientation ===
+            m_camera->setLookAt(glm::lookAt(newCamPos, closestSpherePos, m_camera->getUp()));
+
+            glm::vec3 front = glm::normalize(closestSpherePos - newCamPos);
+            float newTheta = glm::degrees(atan2(front.z, front.x));
+            float newPhi = glm::degrees(acos(front.y)); // since front is normalized
+
+            m_camera->setPosition(newCamPos);
+            m_camera->setFront(front);
+
+            // Now sync the angles so Update() maintains this direction
+            m_camera->setTheta(newTheta);
+            m_camera->setPhi(newPhi);
+        }
+        // Gamemode: Exploration
+        else {
+
+            m_camera->setPosition(oldCamPos);
+            m_camera->setFront(oldFront);
+
+            float newTheta = glm::degrees(atan2(oldFront.z, oldFront.x));
+            float newPhi = glm::degrees(acos(oldFront.y)); // since front is normalized
+            m_camera->setTheta(newTheta);
+            m_camera->setPhi(newPhi);
+        }
+
+        speed = 0.0;
     }
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
-        speed -= .2;
-        speed = glm::clamp(0.0, speed, 10.0);
+    // Planet Observation Reset Button
+    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_R) == GLFW_PRESS && !m_graphics->getGamemode()) {
+        Camera* m_camera = m_graphics->getCamera();
+        glm::vec3 camPos = m_camera->getPosition();
+        const float desiredDistance = 85.0f;  // Set your desired distance here
+
+        glm::vec3 closestSpherePos = m_graphics->GetClosestSpherePosition(savedClosestSpherePos);
+        // === Move camera to a fixed distance away from the sphere ===
+
+        glm::vec3 direction = glm::normalize(glm::vec3(0, 0, 0) - closestSpherePos); // From sphere toward origin
+        glm::vec3 worldUp = glm::vec3(0, 1, 0);
+        glm::vec3 leftDirection = glm::normalize(glm::cross(worldUp, direction));
+        glm::vec3 newCamPos = closestSpherePos + leftDirection * desiredDistance;
+
+        // === Update camera position and orientation ===
+        m_camera->setLookAt(glm::lookAt(newCamPos, closestSpherePos, m_camera->getUp()));
+
+        glm::vec3 front = glm::normalize(closestSpherePos - newCamPos);
+        float newTheta = glm::degrees(atan2(front.z, front.x));
+        float newPhi = glm::degrees(acos(front.y)); // since front is normalized
+
+        m_camera->setPosition(newCamPos);
+        m_camera->setFront(front);
+
+        // Now sync the angles so Update() maintains this direction
+        m_camera->setTheta(newTheta);
+        m_camera->setPhi(newPhi);
     }
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(0., (sensitivity + 3.0 * speed) / 20, 0., 0., 0., 0.);
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
-        m_graphics->getCamera()->Update(0., -(sensitivity + 3.0 * speed)/20, 0., 0., 0., 0.);
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT) == GLFW_PRESS) {
-        yawInput = 2.0f; // Yaw left
-    }
-    else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS) {
-        yawInput = -2.0f; // Yaw right
-    }
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_UP) == GLFW_PRESS) {
-        pitchInput = 2.0f; // Pitch up
-    }
-    else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_DOWN) == GLFW_PRESS) {
-        pitchInput = -2.0f; // Pitch down
+    // Gamemode: Exploration
+    if (m_graphics->getGamemode()) {
+
+        //Only have these controls if we have our starship
+
+        // Update camera animation here.
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS) {
+            speed += .2;
+            speed = glm::clamp(0.0, speed, 10.0);
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS) {
+            speed -= .2;
+            speed = glm::clamp(0.0, speed, 10.0);
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
+            m_graphics->getCamera()->Update(0., (sensitivity + 3.0 * speed) / 20, 0., 0., 0., 0.);
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
+            m_graphics->getCamera()->Update(0., -(sensitivity + 3.0 * speed) / 20, 0., 0., 0., 0.);
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT) == GLFW_PRESS) {
+            yawInput = 2.0f; // Yaw left
+        }
+        else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS) {
+            yawInput = -2.0f; // Yaw right
+        }
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_UP) == GLFW_PRESS) {
+            pitchInput = 2.0f; // Pitch up
+        }
+        else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_DOWN) == GLFW_PRESS) {
+            pitchInput = -2.0f; // Pitch down
+        }
+
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_Q) == GLFW_PRESS) {
+            rollInput = -2.0f;  // Roll left
+        }
+        else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_E) == GLFW_PRESS) {
+            rollInput = 2.0f;   // Roll right
+        }
+        m_graphics->getCamera()->Update(speed / 5, 0., 0., 0., 0., 0.);
+
+        m_graphics->UpdateRotation(yawInput, pitchInput, rollInput);
     }
 
-    if (glfwGetKey(m_window->getWindow(), GLFW_KEY_Q) == GLFW_PRESS) {
-        rollInput = -2.0f;  // Roll left
-    }
-    else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_E) == GLFW_PRESS) {
-        rollInput = 2.0f;   // Roll right
-    }
-    m_graphics->getCamera()->Update(speed / 5, 0., 0., 0., 0., 0.);
-
-    m_graphics->UpdateRotation(yawInput, pitchInput, rollInput);
-
-    m_graphics->getCamera()->Update(0., 0., 0., sensitivity * (m_xpos - lastX) / m_WINDOW_WIDTH, 
-                                                    sensitivity * (m_ypos - lastY) / m_WINDOW_HEIGHT, 0.);
+    m_graphics->getCamera()->Update(0., 0., 0., sensitivity * (m_xpos - lastX) / m_WINDOW_WIDTH,
+        sensitivity * (m_ypos - lastY) / m_WINDOW_HEIGHT, 0.);
     lastX = m_xpos;
     lastY = m_ypos;
 
     //Scroll Wheel
     m_graphics->getCamera()->Update(0., 0., 0., 0., 0., m_scroll);
     m_scroll = 0.f;
+    wasMKeyPressed = isMKeyPressed;
 }
 
 bool Engine::firstUpdate = true;
