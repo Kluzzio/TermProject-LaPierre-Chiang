@@ -78,21 +78,6 @@ class Graphics
 
     std::vector<CelestialBody> celestialBodies;
 
-    Sphere* m_sphere;
-    Sphere* m_sphere2;
-    Sphere* m_sphere3;
-    Sphere* m_ceres;
-    Sphere* m_eris;
-    Sphere* m_haumea;
-    Sphere* m_jupiter;
-    Sphere* m_mars;
-    Sphere* m_mercury;
-    Sphere* m_neptune;
-    Sphere* m_saturn;
-    Sphere* m_uranus;
-    Sphere* m_venus;
-
-
     Mesh* m_mesh;
 
     Sphere* m_skybox = nullptr;
