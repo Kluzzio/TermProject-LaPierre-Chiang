@@ -200,27 +200,33 @@ void Engine::ProcessInput()
         if (rollInput != 0.0f || yawInput != 0.0f || pitchInput != 0.0f) {
             Camera* m_camera = m_graphics->getCamera();
             glm::vec3 camPos = m_camera->getPosition();
+            glm::vec3 camFront = m_camera->getFront();  // Already includes theta/phi
+            glm::vec3 camUp = m_camera->getUp();        // Already includes roll
 
-            // Face same direction as starship
-            glm::vec3 forward = m_graphics->getCurrentShipRot() * glm::vec3(0.0f, 0.0f, 1.0f);
-            glm::vec3 up = m_graphics->getCurrentShipRot() * glm::vec3(0.0f, 1.0f, 0.0f);
+            // Recalculate local axes
+            glm::vec3 camRight = glm::normalize(glm::cross(camFront, camUp));
+            glm::vec3 localUp = glm::normalize(glm::cross(camRight, camFront)); // corrected up
 
+            // Apply pitch (around local right)
+            glm::quat pitchQuat = glm::angleAxis(glm::radians(pitchInput), camRight);
+            // Apply yaw (around local up)
+            glm::quat yawQuat = glm::angleAxis(glm::radians(yawInput), localUp);
 
-            glm::vec3 camTarget = m_graphics->getCurrentShipPos() + forward;
-            m_camera->setFront(glm::normalize(camTarget - camPos));
+            glm::quat combinedRot = yawQuat * pitchQuat;
+            glm::vec3 rotatedFront = glm::normalize(combinedRot * camFront);
 
-            float newTheta = glm::degrees(atan2(forward.z, forward.x)) - yawInput;
-            float newPhi = glm::degrees(acos(forward.y)) - pitchInput;
-            m_camera->setTheta(newTheta); //yaw
-            m_camera->setPhi(newPhi); //pitch
+            // Set new orientation
+            glm::vec3 camTarget = camPos + rotatedFront;
+            m_camera->setFront(rotatedFront);
 
-            float rollAngle = glm::degrees(atan2(
-                glm::dot(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), up), forward),
-                glm::dot(glm::vec3(0.0f, 1.0f, 0.0f), up)
-            ));
-            m_camera->setRoll(rollAngle - rollInput); // Or add/subtract depending on input convention
+            // Optionally recompute theta and phi for consistency if you use them elsewhere
+            float newTheta = glm::degrees(atan2(rotatedFront.z, rotatedFront.x));
+            float newPhi = glm::degrees(acos(rotatedFront.y));
+            m_camera->setTheta(newTheta);
+            m_camera->setPhi(newPhi);
 
-
+            // Apply roll last
+            m_camera->UpdateWithRoll(0., 0., 0., 0., 0., rollInput, 0.);
         }
 
         m_graphics->UpdateRotation(yawInput, pitchInput, rollInput);

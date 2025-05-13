@@ -12,6 +12,7 @@ public:
 	glm::mat4 GetProjection();
 	glm::mat4 GetView();
 	void Update(float d_forward, float d_left, float d_up, float d_theta, float d_phi, float d_fov);
+	void UpdateWithRoll(float d_forward, float d_left, float d_up, float d_theta, float d_phi, float d_roll, float d_fov);
 	void Update(float d_forward, float d_left, float d_up, float d_theta, float d_phi, float d_fov, bool freefly);
 
 	void setPosition(glm::vec3 pos) { cameraPos = pos; }
