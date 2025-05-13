@@ -77,9 +77,11 @@ void Engine::ProcessInput()
 
         Camera* m_camera = m_graphics->getCamera();
         glm::vec3 camPos = m_camera->getPosition();
-        glm::vec3 closestSpherePos = m_graphics->GetClosestSpherePosition(camPos);
+        Sphere* closestSphere = m_graphics->GetClosestSpherePosition(camPos);
+        glm::vec3 closestSpherePos = closestSphere->GetModel()[3];
 
         savedClosestSpherePos = closestSpherePos;
+        savedClosestSphere = closestSphere;
 
         //std::cout << "Closest sphere position: "
         //    << glm::to_string(closestSpherePos) << std::endl;
@@ -129,9 +131,12 @@ void Engine::ProcessInput()
     if (glfwGetKey(m_window->getWindow(), GLFW_KEY_R) == GLFW_PRESS && !m_graphics->getGamemode()) {
         Camera* m_camera = m_graphics->getCamera();
         glm::vec3 camPos = m_camera->getPosition();
-        const float desiredDistance = 85.0f;  // Set your desired distance here
 
-        glm::vec3 closestSpherePos = m_graphics->GetClosestSpherePosition(savedClosestSpherePos);
+        float scaleFactor = m_graphics->GetScaleFromSphere(savedClosestSphere).x; // or .y or .z — they're the same
+        const float desiredDistance = 20.0f * (scaleFactor / 15.0f) + 40.0f;
+
+        glm::vec3 closestSpherePos = savedClosestSphere->GetModel()[3];
+        
         // === Move camera to a fixed distance away from the sphere ===
 
         glm::vec3 direction = glm::normalize(glm::vec3(0, 0, 0) - closestSpherePos); // From sphere toward origin
@@ -192,7 +197,74 @@ void Engine::ProcessInput()
         }
         m_graphics->getCamera()->Update(speed / 5, 0., 0., 0., 0., 0.);
 
+        if (rollInput != 0.0f && yawInput != 0.0f && pitchInput != 0.0f) {
+            Camera* m_camera = m_graphics->getCamera();
+            glm::vec3 camPos = m_camera->getPosition();
+
+            // Face same direction as starship
+            glm::vec3 forward = m_graphics->getCurrentShipRot() * glm::vec3(0.0f, 0.0f, 1.0f);
+            glm::vec3 up = m_graphics->getCurrentShipRot() * glm::vec3(0.0f, 1.0f, 0.0f);
+
+
+            glm::vec3 camTarget = m_graphics->getCurrentShipPos() + forward;
+            m_camera->setFront(glm::normalize(camTarget - camPos));
+
+            float newTheta = glm::degrees(atan2(forward.z, forward.x));
+            float newPhi = glm::degrees(acos(forward.y));
+            m_camera->setTheta(newTheta);
+            m_camera->setPhi(newPhi);
+
+        }
+
         m_graphics->UpdateRotation(yawInput, pitchInput, rollInput);
+    }
+    // Gamemode: Planetary Observation
+    else {
+        // Update camera animation here.
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS)
+            m_graphics->getCamera()->Update(0., 0., (sensitivity) / 20, 0., 0., 0., true);
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS)
+            m_graphics->getCamera()->Update(0., 0., -(sensitivity) / 20, 0., 0., 0., true);
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS)
+            m_graphics->getCamera()->Update(0., (sensitivity) / 20, 0., 0., 0., 0.);
+        if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
+            m_graphics->getCamera()->Update(0., -(sensitivity) / 20, 0., 0., 0., 0.);
+
+        bool moving =
+            glfwGetKey(m_window->getWindow(), GLFW_KEY_W) == GLFW_PRESS ||
+            glfwGetKey(m_window->getWindow(), GLFW_KEY_S) == GLFW_PRESS ||
+            glfwGetKey(m_window->getWindow(), GLFW_KEY_A) == GLFW_PRESS ||
+            glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS;
+
+        Camera* m_camera = m_graphics->getCamera();
+        glm::vec3 camPos = m_camera->getPosition();
+
+        glm::vec3 closestSpherePos = glm::vec3(savedClosestSphere->GetModel()[3]);
+
+        // Compute direction from sphere to current camera position (preserving relative direction)
+        glm::vec3 sphereToCamDir = glm::normalize(camPos - closestSpherePos);
+
+        // Use scale to calculate appropriate distance
+        float scaleFactor = m_graphics->GetScaleFromSphere(savedClosestSphere).x; // assuming uniform scale
+        const float desiredDistance = 20.0f * (scaleFactor / 15.0f) + 40.0f;
+
+        // Compute new camera position along preserved direction
+        glm::vec3 newCamPos = closestSpherePos + sphereToCamDir * desiredDistance;
+
+        // Update camera
+        if (moving) {
+            glm::vec3 front = glm::normalize(closestSpherePos - newCamPos); // camera should still look at the sphere
+            float newTheta = glm::degrees(atan2(front.z, front.x));
+            float newPhi = glm::degrees(acos(front.y)); // acos assumes front is normalized
+            m_camera->setFront(front);
+            m_camera->setTheta(newTheta);
+            m_camera->setPhi(newPhi);
+        }
+
+        m_camera->setPosition(newCamPos);
+
+        // Optional: update the lookAt matrix if your camera system uses it internally
+        m_camera->setLookAt(glm::lookAt(newCamPos, closestSpherePos, m_camera->getUp()));
     }
 
     m_graphics->getCamera()->Update(0., 0., 0., sensitivity * (m_xpos - lastX) / m_WINDOW_WIDTH,

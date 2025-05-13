@@ -78,6 +78,9 @@ bool Graphics::Initialize(int width, int height)
 	// Starship
 	m_mesh = new Mesh(glm::vec3(2.0f, 3.0f, -5.0f), "assets\\SpaceShip-1.obj", "assets\\SpaceShip-1.png");
 
+	// halley
+	m_halley = new Mesh(glm::vec3(0.0f), "assets\\halley.obj", "assets\\comet.jpg");
+
 	glm::vec3 camPos = m_camera->getPosition();
 	glm::vec3 camFront = glm::normalize(m_camera->getFront());
 	glm::vec3 camUp = glm::normalize(m_camera->getUp());
@@ -229,6 +232,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		UpdateCelestialBodyTransform(body, dt);
 	}
 
+
 	// Clear the stack for safety
 	while (!modelStack.empty()) modelStack.pop();
 
@@ -236,7 +240,39 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		modelStack.push(glm::mat4(1.0f));  // Push identity matrix
 	}
 
+	float angle = 1000 * 0.05f;
+	// negative orbit
+	angle = -angle;
+
+	float orbitRadius = 20.0f * 150.0f;
+	float b = orbitRadius * sqrt(1.0f - 0.6f * 0.6f);
+	float x = orbitRadius * cos(angle);
+	float z = b * sin(angle);
+	float y = 1.0f * sin(angle * 2.0f);
+
+	tmat = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+
+	rmat = glm::mat4(1.0f);
+	float spin_angle = 1000 * 0.01f;
+
+	// First tilt the spin axis
+	rmat = glm::rotate(rmat, glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	// Then spin around the (tilted) Y-axis
+	rmat = glm::rotate(rmat, spin_angle, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	smat = glm::scale(glm::mat4(1.0f), glm::vec3(.1f));
+
+	localTransform = tmat * rmat * smat;
+	if (m_halley != NULL)
+		m_halley->Update(localTransform);
+
+
 	if (getGamemode()) {
+		glm::vec3 shipForward = currentShipRot * glm::vec3(0.0f, 0.0f, -1.0f);
+		glm::vec3 shipUp = currentShipRot * glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 shipRight = currentShipRot * glm::vec3(1.0f, 0.0f, 0.0f);
+
 		// Camera basis vectors
 		glm::vec3 camPos = m_camera->getPosition();
 		glm::vec3 camFront = glm::normalize(m_camera->getFront());
@@ -256,9 +292,9 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		float yawRad = glm::radians(yaw);
 
 		// Build rotation relative to camera's local axes
-		glm::quat q_pitch = glm::angleAxis(pitchRad, camRight);
-		glm::quat q_yaw = glm::angleAxis(yawRad, camUp);
-		glm::quat q_roll = glm::angleAxis(rollRad, camFront);
+		glm::quat q_pitch = glm::angleAxis(pitchRad, shipRight);
+		glm::quat q_yaw = glm::angleAxis(yawRad, shipUp);
+		glm::quat q_roll = glm::angleAxis(rollRad, shipForward);
 
 		// Apply in Yaw  Pitch  Roll order (common flight sim order)
 		glm::quat userRot = q_yaw * q_pitch * q_roll;
@@ -287,12 +323,12 @@ void Graphics::HierarchicalUpdate2(double dt) {
 
 	}
 
-		localTransform = tmat * rmat * smat;
-		if (m_mesh != NULL)
-			m_mesh->Update(localTransform);
+	localTransform = tmat * rmat * smat;
+	if (m_mesh != NULL)
+		m_mesh->Update(localTransform);
 
 	if (m_skybox) {
-		tmat = glm::translate(glm::mat4(1.0f), m_camera->getPosition());
+		tmat = glm::translate(glm::mat4(1.0f), getGamemode() ? currentShipPos : m_camera->getPosition());
 		smat = glm::scale(glm::mat4(1.0f), glm::vec3(50.0f)); // Large enough to surround all objects
 		rmat = glm::mat4(1.0f);  // No rotation
 		glm::mat4 model = tmat * rmat * smat;
@@ -333,17 +369,12 @@ void Graphics::UpdateCelestialBodyTransform(CelestialBody& body, double dt) {
 		float orbitalAngle = fmod(body.startingOrbitalPhaseRadians + orbitalSpeed * (float)dt * 1000.0f, 2.0f * glm::pi<float>());
 
 		// If this is the moon, adjust its distance relative to the Earth, not the Sun
-		float distance = body.name == "Moon" ? 0.00256f * 150.0f : body.orbitalDistanceAU * 150.0f;  // 0.00256 AU is the distance from Earth to Moon in AU
+		float distance = body.name == "Moon" ? 0.0256f * 150.0f : body.orbitalDistanceAU * 150.0f;  // 0.00256 AU is the distance from Earth to Moon in AU
 
 		glm::mat4 orbitRot = glm::rotate(glm::mat4(1.0f), orbitalAngle, glm::vec3(0, 1, 0));
 		glm::mat4 orbitTrans = glm::translate(glm::mat4(1.0f), glm::vec3(distance, 0, 0));
 		tmat = orbitRot * orbitTrans;
-		if (body.parent->name != "Sun") {
-			//tmat *= parentTmat;
-		}
-
 	}
-
 	// Axial tilt (rotate on Z)
 	glm::mat4 tiltMat = glm::rotate(glm::mat4(1.0f), glm::radians(body.axialTiltDegrees), glm::vec3(0, 0, 1));
 
@@ -369,10 +400,11 @@ void Graphics::ComputeTransforms(double dt, std::vector<float> speed, std::vecto
 	smat = glm::scale(glm::vec3(scale[0], scale[1], scale[2]));
 }
 
-glm::vec3 Graphics::GetClosestSpherePosition(const glm::vec3& cameraPos) const
+Sphere* Graphics::GetClosestSpherePosition(const glm::vec3& cameraPos) const
 {
 	float minDistance = std::numeric_limits<float>::max();
 	glm::vec3 closestPosition;
+	Sphere* closestCelestialBody = nullptr;
 
 	for (const auto& sphere : celestialBodies)
 	{
@@ -383,11 +415,23 @@ glm::vec3 Graphics::GetClosestSpherePosition(const glm::vec3& cameraPos) const
 			if (distance < minDistance) {
 				minDistance = distance;
 				closestPosition = pos;
+				closestCelestialBody = sphere.object;
 			}
 		}
 	}
 
-	return closestPosition;
+	return closestCelestialBody;
+}
+
+glm::vec3 Graphics::GetScaleFromSphere(Sphere* target) {
+	for (const auto& body : celestialBodies) {
+		if (body.object == target) {
+			return body.scale;
+		}
+	}
+
+	// If not found, return default
+	return glm::vec3(1.0f);
 }
 
 
@@ -418,6 +462,12 @@ void Graphics::Render()
 	if (m_mesh != NULL) {
 		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_mesh->GetModel()));
 		m_mesh->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
+	}
+
+	// Render Halley's comet
+	if (m_halley != NULL) {
+		glUniformMatrix4fv(m_modelMatrix, 1, GL_FALSE, glm::value_ptr(m_halley->GetModel()));
+		m_halley->Render(m_positionAttrib, m_colorAttrib, m_tcAttrib, m_hasTexture);
 	}
 
 	for (auto& body : celestialBodies) {

@@ -43,7 +43,16 @@ class Graphics
 
     Camera* getCamera() { return m_camera; }
 
-    glm::vec3 GetClosestSpherePosition(const glm::vec3& cameraPos) const;
+    Sphere* GetClosestSpherePosition(const glm::vec3& cameraPos) const;
+
+    glm::vec3 GetScaleFromSphere(Sphere* target);
+
+    glm::vec3 getCurrentShipPos() {
+        return currentShipPos;
+    }
+    glm::quat getCurrentShipRot() {
+        return currentShipRot;
+    }
 
     void UpdateRotation(float yawInput, float pitchInput, float rollInput) {
         yaw = yawInput;
@@ -79,6 +88,7 @@ class Graphics
     std::vector<CelestialBody> celestialBodies;
 
     Mesh* m_mesh;
+    Mesh* m_halley;
 
     Sphere* m_skybox = nullptr;
 

@@ -48,6 +48,8 @@ class Engine
 
     bool wasMKeyPressed = false;
 
+    Sphere* savedClosestSphere = nullptr;
+
 };
 
 #endif // ENGINE_H

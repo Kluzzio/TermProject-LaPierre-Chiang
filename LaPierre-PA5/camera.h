@@ -12,10 +12,12 @@ public:
 	glm::mat4 GetProjection();
 	glm::mat4 GetView();
 	void Update(float d_forward, float d_left, float d_up, float d_theta, float d_phi, float d_fov);
+	void Update(float d_forward, float d_left, float d_up, float d_theta, float d_phi, float d_fov, bool freefly);
 
 	void setPosition(glm::vec3 pos) { cameraPos = pos; }
 	void setLookAt(glm::mat4 lookAt) { view = lookAt; }
 	void setFront(glm::vec3 front) { cameraFront = front; }
+	void setUp(glm::vec3 up) { cameraUp = up; }
 
 	glm::vec3 getPosition() const { return cameraPos; }
 	glm::vec3 getFront() const { return cameraFront; }

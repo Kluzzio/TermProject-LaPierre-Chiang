@@ -56,6 +56,32 @@ void Camera::Update(float d_forward, float d_left, float d_up, float d_theta, fl
 		10000.0f); //Distance to the far plane, 
 }
 
+void Camera::Update(float d_forward, float d_left, float d_up, float d_theta, float d_phi, float d_fov, bool freefly) {
+	theta += d_theta;
+	phi += d_phi;
+	if (phi > 179.f) phi = 179.f;
+	if (phi < 1.f) phi = 1.f;
+	fov += d_fov;
+	if (fov > 45.f) fov = 45.f;
+	if (fov < 1.f) fov = 1.f;
+
+	cameraFront = { cos(glm::radians(theta)) * sin(glm::radians(phi)),
+					cos(glm::radians(phi)),
+					sin(glm::radians(theta)) * sin(glm::radians(phi)) };
+	cameraPos += d_forward * cameraFront;
+	if (freefly)
+		cameraPos += d_up * cameraUp;
+	cameraPos += d_left * glm::normalize(glm::cross(cameraUp, cameraFront));
+
+	view = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
+	//std::cout << theta << " " << phi << std::endl;
+
+	projection = glm::perspective(glm::radians(fov), //the FoV typically 90 degrees is good which is what this is set to
+		float(width) / float(height), //Aspect Ratio, so Circles stay Circular
+		0.01f, //Distance to the near plane, normally a small value like this
+		10000.0f); //Distance to the far plane, 
+}
+
 
 glm::mat4 Camera::GetProjection()
 {
