@@ -29,7 +29,7 @@ public:
 private:
 	int width, height;
 	glm::vec3 cameraPos, cameraFront, cameraUp;
-	float theta, phi;
+	float theta, phi, roll;
 	float fov;
 	glm::mat4 projection;
 	glm::mat4 view;

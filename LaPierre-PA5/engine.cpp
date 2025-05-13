@@ -177,16 +177,16 @@ void Engine::ProcessInput()
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_D) == GLFW_PRESS)
             m_graphics->getCamera()->Update(0., -(sensitivity + 3.0 * speed) / 20, 0., 0., 0., 0.);
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_LEFT) == GLFW_PRESS) {
-            yawInput = 2.0f; // Yaw left
+            yawInput = 0.6f; // Yaw left
         }
         else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_RIGHT) == GLFW_PRESS) {
-            yawInput = -2.0f; // Yaw right
+            yawInput = -0.6f; // Yaw right
         }
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_UP) == GLFW_PRESS) {
-            pitchInput = 2.0f; // Pitch up
+            pitchInput = 0.4f; // Pitch up
         }
         else if (glfwGetKey(m_window->getWindow(), GLFW_KEY_DOWN) == GLFW_PRESS) {
-            pitchInput = -2.0f; // Pitch down
+            pitchInput = -0.4f; // Pitch down
         }
 
         if (glfwGetKey(m_window->getWindow(), GLFW_KEY_Q) == GLFW_PRESS) {
@@ -197,7 +197,7 @@ void Engine::ProcessInput()
         }
         m_graphics->getCamera()->Update(speed / 5, 0., 0., 0., 0., 0.);
 
-        if (rollInput != 0.0f && yawInput != 0.0f && pitchInput != 0.0f) {
+        if (rollInput != 0.0f || yawInput != 0.0f || pitchInput != 0.0f) {
             Camera* m_camera = m_graphics->getCamera();
             glm::vec3 camPos = m_camera->getPosition();
 
@@ -209,10 +209,17 @@ void Engine::ProcessInput()
             glm::vec3 camTarget = m_graphics->getCurrentShipPos() + forward;
             m_camera->setFront(glm::normalize(camTarget - camPos));
 
-            float newTheta = glm::degrees(atan2(forward.z, forward.x));
-            float newPhi = glm::degrees(acos(forward.y));
-            m_camera->setTheta(newTheta);
-            m_camera->setPhi(newPhi);
+            float newTheta = glm::degrees(atan2(forward.z, forward.x)) - yawInput;
+            float newPhi = glm::degrees(acos(forward.y)) - pitchInput;
+            m_camera->setTheta(newTheta); //yaw
+            m_camera->setPhi(newPhi); //pitch
+
+            float rollAngle = glm::degrees(atan2(
+                glm::dot(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), up), forward),
+                glm::dot(glm::vec3(0.0f, 1.0f, 0.0f), up)
+            ));
+            m_camera->setRoll(rollAngle - rollInput); // Or add/subtract depending on input convention
+
 
         }
 

@@ -283,32 +283,18 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		glm::vec3 offset = (30.0f * camFront) + (-10.0f * camUp);
 		glm::vec3 targetPos = camPos + offset;
 
-		// --- Target Orientation ---
-		glm::quat targetRot = currentShipRot;
-
-		// Convert to radians
-		float rollRad = glm::radians(roll);
-		float pitchRad = glm::radians(pitch);
-		float yawRad = glm::radians(yaw);
-
-		// Build rotation relative to camera's local axes
-		glm::quat q_pitch = glm::angleAxis(pitchRad, shipRight);
-		glm::quat q_yaw = glm::angleAxis(yawRad, shipUp);
-		glm::quat q_roll = glm::angleAxis(rollRad, shipForward);
-
-		// Apply in Yaw  Pitch  Roll order (common flight sim order)
-		glm::quat userRot = q_yaw * q_pitch * q_roll;
-
-		// Combine target facing + user input
-		targetRot = targetRot * userRot;
-
 		// Interpolation for smooth following
 		float followSpeed = 5.0f;
 		float t = glm::clamp(static_cast<float>(followSpeed * dt), 0.0f, 1.0f);
 
+
+		glm::vec3 direction = glm::normalize(-camFront);  // Forward direction
+		glm::vec3 up = glm::normalize(camUp);            // World or camera up
+
+		currentShipRot = glm::quatLookAt(direction, up);
+
 		// Interpolate position and rotation
 		currentShipPos = glm::mix(currentShipPos, targetPos, t);
-		currentShipRot = targetRot;
 
 		// Final transforms
 		tmat = glm::translate(glm::mat4(1.0f), currentShipPos);
