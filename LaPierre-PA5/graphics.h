@@ -11,6 +11,7 @@ using namespace std;
 #include "object.h"
 #include "sphere.h"
 #include "mesh.h"
+#include <list>
 
 #define numVBOs 2;
 #define numIBs 2;
@@ -85,7 +86,7 @@ class Graphics
     GLuint m_sampler;
     GLint m_hasTexture;
 
-    std::vector<CelestialBody> celestialBodies;
+    std::list<CelestialBody> celestialBodies;
 
     Mesh* m_mesh;
     Mesh* m_halley;

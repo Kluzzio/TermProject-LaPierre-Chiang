@@ -30,7 +30,7 @@ public:
 
 private:
     glm::vec3 pivotLocation;
-    glm::mat4 model;
+    glm::mat4 model = glm::mat4(0.0f);
     std::vector<Vertex> Vertices;
     std::vector<unsigned int> Indices;
     GLuint VB;

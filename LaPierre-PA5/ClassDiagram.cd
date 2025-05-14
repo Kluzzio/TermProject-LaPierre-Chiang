@@ -8,7 +8,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Texture">
-    <Position X="5.25" Y="1.25" Width="1.5" />
+    <Position X="14.25" Y="0.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAABAAAAAAAAAAgEAAAAAAAAAAAAgIAAAAAAAA=</HashCode>
       <FileName>Texture.h</FileName>
@@ -22,21 +22,21 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Shader">
-    <Position X="2.75" Y="0.75" Width="1.75" />
+    <Position X="12" Y="3.25" Width="1.75" />
     <TypeIdentifier>
       <HashCode>QAACACAAAAAAAQAAAAAACAAAAAAEgAAABAAAAAAAIAA=</HashCode>
       <FileName>shader.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Object">
-    <Position X="9.75" Y="3" Width="1.5" />
+    <Position X="9.75" Y="0.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQAAIAAAUCAAAAgAAAAABADAAAAAAAAEBAAAABMAgA=</HashCode>
       <FileName>object.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Mesh">
-    <Position X="18.5" Y="1.5" Width="1.5" />
+    <Position X="9.75" Y="5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQAAYAAAEGAAAAAAAAAEAADAAAAAAgAFRAAAABMAgA=</HashCode>
       <FileName>mesh.h</FileName>
@@ -45,33 +45,33 @@
   <Class Name="Graphics">
     <Position X="16.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>BABAAAAEISCEhYAgAAAQAESoCBAAAEMCABEIgCBAAoE=</HashCode>
+      <HashCode>BgBAAAAEITCEhYAgAAAQAESqCBAAAEMCABEIgCBAA4E=</HashCode>
       <FileName>graphics.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Engine">
-    <Position X="14.25" Y="1" Width="1.5" />
+    <Position X="3" Y="1" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>KEAAAAEGBAQAAYICIAQAASAAAAAwBQCABAAACAACCAI=</HashCode>
+      <HashCode>KEAAAAEGBAQAAYICIAQAQSAAAAAwBQCABAAACAACCAI=</HashCode>
       <FileName>engine.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Camera">
-    <Position X="11.75" Y="1" Width="1.5" />
+    <Position X="5.25" Y="1" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>IFQCIQAAACACAQQAUAAgAQACAQAAAMAAgQABAAAAAAA=</HashCode>
+      <HashCode>IFQCIQAACCACAQQAUAAgAQAiAQAAAMAAgQABAAAAAAA=</HashCode>
       <FileName>camera.h</FileName>
     </TypeIdentifier>
   </Class>
   <Struct Name="Vertex">
-    <Position X="1.75" Y="5.75" Width="1.5" />
+    <Position X="12" Y="0.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAABAAAAAQAAAAgAAAAAAgAAAAAAAAAAAAA=</HashCode>
       <FileName>graphics_headers.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="CelestialBody">
-    <Position X="4.25" Y="5.5" Width="1.5" />
+    <Position X="14.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QEAgAAAQACAAAABAAAAAAAICAAAEAAAAAAAAAAAgAAA=</HashCode>
       <FileName>graphics.h</FileName>

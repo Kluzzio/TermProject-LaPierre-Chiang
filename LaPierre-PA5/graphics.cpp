@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include <glm/gtx/string_cast.hpp>
 
 Graphics::Graphics()
 {
@@ -127,12 +128,15 @@ bool Graphics::Initialize(int width, int height)
 		"assets\\2k_earth_daymap.jpg", 365.25f, 1.0f, 23.44f, 23.93f,
 		glm::vec3(12.f), sun, glm::radians(75.0f)
 		});
+	CelestialBody* earth = &celestialBodies.back();
 
 	celestialBodies.push_back({
-		"Mars", new Sphere(32, "assets\\mars.jpg"),
-		"assets\\mars.jpg", 686.98f, 1.524f, 25.19f, 24.6f,
+		"Mars", new Sphere(32, "assets\\Mars.jpg"),
+		"assets\\Mars.jpg", 686.98f, 1.524f, 25.19f, 24.6f,
 		glm::vec3(10.f), sun, glm::radians(5.0f)
 		});
+
+	CelestialBody* mars = &celestialBodies.back();
 
 	celestialBodies.push_back({
 		"Jupiter", new Sphere(32, "assets\\jupiter.jpg"),
@@ -141,10 +145,12 @@ bool Graphics::Initialize(int width, int height)
 		});
 
 	celestialBodies.push_back({
-		"Saturn", new Sphere(32, "assets\\saturn.jpg"),
-		"assets\\saturn.jpg", 10759.22f, 9.537f, 26.73f, 10.7f,
+		"Saturn", new Sphere(32, "assets\\Saturn.jpg"),
+		"assets\\Saturn.jpg", 10759.22f, 9.537f, 26.73f, 10.7f,
 		glm::vec3(28.f), sun, glm::radians(265.0f)
 		});
+
+	CelestialBody* saturn = &celestialBodies.back();
 
 	celestialBodies.push_back({
 		"Uranus", new Sphere(32, "assets\\uranus.jpg"),
@@ -181,31 +187,28 @@ bool Graphics::Initialize(int width, int height)
 
 
 	// EARTH'S MOON
-	CelestialBody* earth = &celestialBodies[3]; // Index of Earth in the list
 	celestialBodies.push_back({
-		"Moon", new Sphere(32, "assets\\2k_moon.jpg"), 
-		"assets\\2k_moon.jpg", 27.3f, 0.00257f, 6.68f, 655.7f, // Orbital period ~27.3 days, rotation ~27.3 days
+		"Moon", new Sphere(32, "assets\\2k_moon.jpg"),
+		"assets\\2k_moon.jpg", 27.3f, 0.0256f, 6.68f, 655.7f, // Orbital period ~27.3 days, rotation ~27.3 days
 		glm::vec3(0.27f), earth, glm::radians(75.0f)
 		});
 
+	// Phobos (Mars' moon)
+	celestialBodies.push_back({
+		"Phobos", new Sphere(32, "assets\\Phobos.jpg"),
+		"assets\\Phobos.jpg", 0.319f, 0.00624f * 2.0, 0.0f, 7.65f, // Orbit ~7.65h, distance in AU, tidally locked (rotation = orbital period) (orbit distance mult to acc for mars size)
+		glm::vec3(0.15f), mars, glm::radians(5.0f)
+		});
 
-	// Add celestial bodies
-	//celestialBodies = {
-	//	{ "Mercury", nullptr, "assets\\mercury.jpg", opd, odau, atd, rph, scale, parent },
-	//	{ "Mercury", nullptr, "assets\\mercury.jpg", {0.8f, 0.f, 0.8f}, {180.f, 0.f, 180.f}, 8.f, {0,1,0}, {8.f, 8.f, 8.f} },
-	//	{ "Venus", nullptr, "assets\\venus.jpg", {0.6f, 0.f, 0.6f}, {250.f, 0.f, 250.f}, 6.f, {0,1,0}, {12.f, 12.f, 12.f} },
-	//	{ "Mars", nullptr, "assets\\mars.jpg", {0.45f, 0.f, 0.45f}, {350.f, 0.f, 350.f}, 4.5f, {0,1,0}, {18.f, 18.f, 18.f} },
-	//	{ "Jupiter", nullptr, "assets\\jupiter.jpg", {0.3f, 0.f, 0.3f}, {500.f, 0.f, 500.f}, 3.f, {0,1,0}, {60.f, 60.f, 60.f} },
-	//	{ "Saturn", nullptr, "assets\\saturn.jpg", {0.25f, 0.f, 0.25f}, {600.f, 0.f, 600.f}, 2.5f, {0,1,0}, {55.f, 55.f, 55.f} },
-	//	{ "Uranus", nullptr, "assets\\uranus.jpg", {0.2f, 0.f, 0.2f}, {700.f, 0.f, 700.f}, 2.f, {0,1,0}, {50.f, 50.f, 50.f} },
-	//	{ "Neptune", nullptr, "assets\\neptune.jpg", {0.15f, 0.f, 0.15f}, {800.f, 0.f, 800.f}, 1.5f, {0,1,0}, {48.f, 48.f, 48.f} },
-	//	{ "Ceres", nullptr, "assets\\ceres.jpg", {0.7f, 0.f, 0.7f}, {220.f, 0.f, 220.f}, 7.f, {0,1,0}, {5.f, 5.f, 5.f} },
-	//	{ "Eris", nullptr, "assets\\eris.jpg", {0.05f, 0.f, 0.05f}, {1000.f, 0.f, 1000.f}, 0.5f, {0,1,0}, {15.f, 15.f, 15.f} },
-	//	{ "Haumea", nullptr, "assets\\haumea.jpg", {0.06f, 0.f, 0.06f}, {950.f, 0.f, 950.f}, 0.6f, {0,1,0}, {13.f, 13.f, 13.f} }
-	//};
+	// Titan (Saturn's largest moon)
+	celestialBodies.push_back({
+		"Titan", new Sphere(32, "assets\\Titan.jpg"),
+		"assets\\Titan.jpg", 15.945f, 0.0817f, 0.3f, 382.7f, // Orbit ~16 days, distance in AU, rotation period ~15.9d
+		glm::vec3(0.4f), saturn, glm::radians(265.0f)
+		});	
 
 	for (auto& body : celestialBodies) {
-		body.object = new Sphere(48, body.texturePath.c_str());
+		body.object = new Sphere(32, body.texturePath.c_str());
 	}
 
 	m_skybox = new Sphere(32, "assets/galaxy.jpg");
@@ -229,6 +232,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 	}
 
 	for (auto& body : celestialBodies) {
+		std::cout << "No parent for AAAAAAAAAA" << std::endl;
 		UpdateCelestialBodyTransform(body, dt);
 	}
 
@@ -321,8 +325,6 @@ void Graphics::HierarchicalUpdate2(double dt) {
 		m_skybox->Update(model);
 	}
 
-
-
 	while (!modelStack.empty()) modelStack.pop();
 
 }
@@ -330,7 +332,7 @@ void Graphics::HierarchicalUpdate2(double dt) {
 void Graphics::UpdateCelestialBodyTransform(CelestialBody& body, double dt) {
 	glm::mat4 parentTransform = glm::mat4(1.0f);
 
-	if (body.parent) {
+	if (body.parent && body.parent->object) {
 		parentTransform = body.parent->object->GetModel(); // inherit parent transformation
 	}
 	glm::mat4 tmat = glm::mat4(1.0f);
@@ -354,8 +356,7 @@ void Graphics::UpdateCelestialBodyTransform(CelestialBody& body, double dt) {
 		float orbitalSpeed = (2.0f * glm::pi<float>()) / (body.orbitalPeriodDays * 24.0f * 3600.0f);
 		float orbitalAngle = fmod(body.startingOrbitalPhaseRadians + orbitalSpeed * (float)dt * 1000.0f, 2.0f * glm::pi<float>());
 
-		// If this is the moon, adjust its distance relative to the Earth, not the Sun
-		float distance = body.name == "Moon" ? 0.0256f * 150.0f : body.orbitalDistanceAU * 150.0f;  // 0.00256 AU is the distance from Earth to Moon in AU
+		float distance = body.orbitalDistanceAU * 150.0f;
 
 		glm::mat4 orbitRot = glm::rotate(glm::mat4(1.0f), orbitalAngle, glm::vec3(0, 1, 0));
 		glm::mat4 orbitTrans = glm::translate(glm::mat4(1.0f), glm::vec3(distance, 0, 0));

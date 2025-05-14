@@ -92,7 +92,8 @@ void Engine::ProcessInput()
             oldFront = m_camera->getFront();
 
             // === Move camera to a fixed distance away from the sphere ===
-            const float desiredDistance = 85.0f;  // Set your desired distance here
+            float scaleFactor = m_graphics->GetScaleFromSphere(savedClosestSphere).x; // assuming uniform scale
+            const float desiredDistance = 20.0f * (scaleFactor / 15.0f) + 40.0f;
 
             glm::vec3 direction = glm::normalize(glm::vec3(0, 0, 0) - closestSpherePos); // From sphere toward origin
             glm::vec3 worldUp = glm::vec3(0, 1, 0);
